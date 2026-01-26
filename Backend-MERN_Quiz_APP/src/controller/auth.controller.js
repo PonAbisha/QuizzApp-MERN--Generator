@@ -1,63 +1,44 @@
-const express = require('express')
-const router = express.Router()
-const User=require("../model/auth.model.js")
+const express = require("express");
+const jwt = require("jsonwebtoken");
+const User = require("../model/auth.model");
 
-router.post('/login', (req, res) => {
-    const {  email, password } = req.body
-       User.findOne({email:email},(err,user)=>{
-           if(user){
-                if(password===user.password){
-                  console.log("login successfull")
-                    res.send({ message:"Login Succesfully",user:user})
-                }else{
-                    res.send({message:"Invalid Password"})
-                }
-           }else{
-            res.send({message:"User Not Regitered "})
-           }
-       })
-})
-router.post('/register', (req, res) => {
-  const { name, email, password } = req.body
-  User.findOne({ email: email }, (err, user) => {
-    if (user) {
-      res.send({ message: 'User Already Registered' })
-    } else {
-      const user = new User({
-        name,
-        email,
-        password,
-      })
-      user.save((err) => {
-        if (err) {
-          res.send(err)
-        } else {
-          res.send({ message: 'Successfully Registered' })
-        }
-      })
-    }
-  })
-})
-//  ------------ get data of user by admin controller-----------
-router.get('/getuser', async (req, res) => {
-  try {
-    const data = await User.find({}).lean().exec()
-    res.status(200).json(data)
-  } catch (error) {
-    console.log(error)
+const router = express.Router();
+
+// LOGIN
+router.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.status(401).json({ message: "User not found" });
   }
-})
 
-//  ------------delete user by admin controller-----------
+  if (password !== user.password) {
+    return res.status(401).json({ message: "Invalid password" });
+  }
 
-router.delete('/:id',async (req, res) => {
-  User.deleteOne({_id:req.params.id}).then(()=>{
-   res.send("user deleted")
-  }).catch((err) => {
-   res.send("An error Occured")
-  })
-})
+  const token = jwt.sign(
+    { userId: user._id },
+    "SECRET_KEY",
+    { expiresIn: "1d" }
+  );
 
+  res.json({ token, user });
+});
 
+// REGISTER
+router.post("/register", async (req, res) => {
+  const { name, email, password } = req.body;
 
-module.exports = router
+  const exists = await User.findOne({ email });
+  if (exists) {
+    return res.status(400).json({ message: "User already exists" });
+  }
+
+  const user = new User({ name, email, password });
+  await user.save();
+
+  res.json({ message: "Registered successfully" });
+});
+
+module.exports = router;

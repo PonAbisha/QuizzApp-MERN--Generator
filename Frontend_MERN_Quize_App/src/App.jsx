@@ -1,42 +1,149 @@
-import logo from "./logo.svg";
-import "./App.css";
-import { TopicQuiz } from "./Components/TopicQuiz.jsx";
-import { Footer } from "./Components/Footer/Footer.jsx";
-import { NewQuizPage } from "./Pages/NewQuizPage.jsx";
-import { Login } from "./Components/auth/Login.jsx";
-import { Register } from "./Components/auth/Register.jsx";
-import { Route, Routes } from "react-router-dom";
-import { Admin } from "./Components/Admin/Admin.jsx";
-import { QuizForm } from "./Components/Admin/QuizForm.jsx";
-import { ProfileMain } from "./Components/Profile/ProfileMain.jsx";
-import { Quizes } from "./Components/QuizNew/Quizes.jsx";
-import { Navbarnew } from "./Components/Navbar/Navbarnew.jsx";
-import { Resultshow } from "./Pages/Resultshow.jsx";
-import { ShowAllAnswers } from "./Pages/ShowAllAnswers.jsx";
+import { Routes, Route } from "react-router-dom";
+
+/* Layout */
+import Navbar from "./Components/layout/Navbar";
+import { Footer } from "./Components/Footer/Footer";
+
+/* Pages */
+import BookList from "./Pages/BookList";
+import QuestionsPage from "./Pages/Questions";
+import PagesView from "./Pages/PagesView";
+import { Resultshow } from "./Pages/Resultshow";
+import { ShowAllAnswers } from "./Pages/ShowAllAnswers";
+import UploadBook from "./Pages/UploadBook";
+
+/* Auth */
+import { Login } from "./Components/auth/Login";
+import { Register } from "./Components/auth/Register";
+
+/* Quiz */
+import { Quizes } from "./Components/QuizNew/Quizes";
+import QuizHome from "./Pages/QuizHome";
+
+/* Admin */
+import { Admin } from "./Components/Admin/Admin";
+import { QuizForm } from "./Components/Admin/QuizForm";
+import { ProfileMain } from "./Components/Profile/ProfileMain";
+
+/* Protected Route */
+import ProtectedRoute from "./Routes/ProtectedRoute";
 
 function App() {
   return (
-    <div className="App ">
-      <Navbarnew />
+    <>
+      <Navbar />
+
       <Routes>
-        <Route path="/" element={<TopicQuiz />} />
+        {/* PUBLIC */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/HTML" element={<NewQuizPage />} />
-        <Route path="/CSS" element={<NewQuizPage />} />
-        <Route path="/Javascript" element={<NewQuizPage />} />
-        <Route path="/React" element={<NewQuizPage />} />
-        <Route path="/quiz/:id" element={<Quizes />} />
-        <Route path="/Mongodb" element={<NewQuizPage />} />
-        <Route path="/admin" element={<Admin />} />
-        <Route path="/addquiz" element={<QuizForm />} />
-        <Route path="/profile" element={<ProfileMain />} />
-        <Route path="/result" element={<Resultshow />} />
-        <Route path="/showallanswer" element={<ShowAllAnswers />} />
+
+        {/* PROTECTED */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <BookList />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/upload"
+          element={
+            <ProtectedRoute>
+              <UploadBook />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/questions/:bookId"
+          element={
+            <ProtectedRoute>
+              <QuestionsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/pages/:bookId"
+          element={
+            <ProtectedRoute>
+              <PagesView />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/quiz"
+          element={
+            <ProtectedRoute>
+              <QuizHome />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/quiz/:id"
+          element={
+            <ProtectedRoute>
+              <Quizes />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/result"
+          element={
+            <ProtectedRoute>
+              <Resultshow />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/showallanswer"
+          element={
+            <ProtectedRoute>
+              <ShowAllAnswers />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ADMIN */}
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <Admin />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/addquiz"
+          element={
+            <ProtectedRoute>
+              <QuizForm />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <ProfileMain />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
+
       <Footer />
-    </div>
+    </>
   );
 }
 
 export default App;
+  

@@ -1,115 +1,160 @@
-import React from "react";
-import "./Quiz.css";
-import { useEffect } from "react";
-import { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { postQuizResult, postUserResult } from "../../Redux/action.js";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import ExamRulesModal from "./ExamRulesModal";
 
-export const Quiz = (props) => {
-  const questionArr = props.questionArr;
-  const data = useSelector((state) => state?.mernQuize?.QuizData);
-  const result = useSelector((state) => state?.mernQuize?.result);
-  const userID = useSelector((state) => state?.mernQuize?.userId);
-console.log("data",data)
-  const quizID = data[0]._id;
+const TOTAL_TIME = 10 * 60; // 10 minutes
+
+export const Quiz = ({ questionArr }) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const data = useSelector((state) => state?.mernQuize?.QuizData);
+  const userID = useSelector((state) => state?.mernQuize?.userId);
+  const quizID = data?.[0]?._id;
 
   const [num, setNum] = useState(0);
   const [ans, setAns] = useState([]);
   const [btnshow, setBtnshow] = useState(false);
-  const [disable, setDisable] = useState(null);
-  const handleQue = (index) => {
-    setDisable(index);
-  };
+  const [selectedIndex, setSelectedIndex] = useState(null);
+
+  const [timeLeft, setTimeLeft] = useState(TOTAL_TIME);
+  const [started, setStarted] = useState(false);
+
+  const autoSubmitted = useRef(false);
+
+  const currentQuestion = questionArr[num];
+
+  /* ================= TIMER ================= */
+  useEffect(() => {
+    if (!started) return;
+    if (timeLeft <= 0) {
+      if (!autoSubmitted.current) {
+        autoSubmitted.current = true;
+
+        dispatch(postUserResult(ans));
+        dispatch(
+          postQuizResult({
+            quizId: quizID,
+            userId: userID,
+            quizResult: ans,
+          })
+        );
+
+        navigate("/result");
+      }
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [timeLeft, started]);
+
+  /* ================ UI ================= */
 
   return (
-    <div className=" w-11/12 h-96 pt-5 mt-16 bg-white">
-      <div className="w-full shadow-lg  m-4 p-4 ml-12">
-        <div className="flex justify-between align-middle">
-          <div className="w-24  h-16">
-            {/* <img  className="w-full h-full" src="./questionpages.gif" alt="think"/> */}
-            <iframe src="https://embed.lottiefiles.com/animation/103649"></iframe>
-            {/* <video className="w-full" src="./businessanalysis.mp4" /> */}
-          </div>
-          <div className="flex w-4/5 pl-24 ml-12">
-            <h1 className="text-2xl m-2 text-black-400/25">{num + 1})</h1>
-            <h1 className="text-2xl m-2 text-black-400/25">
-              {questionArr[num]?.questions}
-            </h1>
-          </div>
-          <div className="border-teal-500 rounded-2xl absolute  right-24 top-32 border-2 mb-8 p-1 pl-2  pr-2 ">
-            <h1 className="text-xl font-bold">
-              Attempted : {num + "/" + questionArr.length}
-            </h1>
-          </div>
-          <div className=" font-serif text-slate-900">
-            {/* {num + "/" + (questionArr.length)} */}
-          </div>
-        </div>
-        <ol className=" w-3/5 ml-64" disabled={disable}>
-          {questionArr[num]?.options?.map((answer, index) => (
-            <li
-              key={index}
-              className={
-                index == disable && disable != null
-                  ? "show border border-gray-300 text-center cursor-pointer m-2 p-2 rounded-lg"
-                  : `notshow border border-gray-300 text-center cursor-pointer m-2 p-2 rounded-lg`
-              }
-              onClick={(e) => {
-                setAns([...ans, answer.option]);
+    <div className="min-h-screen bg-gray-100 flex justify-center items-center p-4">
 
-                handleQue(index);
-              }}
-            >
-              {answer.option}
-            </li>
-          ))}
-        </ol>
-        <div className="mt-3 ml-80 pl-48">
-          <button
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-1"
-            onClick={() => {
-              setNum(num + 1);
-              setDisable(null);
-            }}
-          >
-            Skip
-          </button>
-          {btnshow ? (
-            <Link to="/showallanswer">
-              {" "}
+      {/* Exam Rules Modal */}
+      {!started && (
+        <ExamRulesModal onStart={() => setStarted(true)} />
+      )}
+
+      {started && (
+        <div className="bg-white w-full max-w-3xl rounded-xl shadow p-6">
+
+          {/* Progress + Timer */}
+          <div className="flex justify-between text-sm text-gray-600 mb-4">
+            <span>
+              Question {num + 1} / {questionArr.length}
+            </span>
+            <span className="font-semibold text-red-600">
+              ⏱️ {Math.floor(timeLeft / 60)}:
+              {String(timeLeft % 60).padStart(2, "0")}
+            </span>
+          </div>
+
+          {/* Question */}
+          <h2 className="text-xl font-tamil mb-6">
+            {currentQuestion?.questions}
+          </h2>
+
+          {/* Options */}
+          <div className="space-y-3">
+            {currentQuestion?.options?.map((answer, index) => (
               <button
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded mr-1"
+                key={index}
                 onClick={() => {
-                  dispatch(postUserResult(ans));
-                  const obj = {
-                    quizId: quizID,
-                    userId: userID,
-                    quizResult: ans,
-                  };
-                  dispatch(postQuizResult(obj));
+                  const updated = [...ans];
+                  updated[num] = answer.option;
+                  setAns(updated);
+                  setSelectedIndex(index);
                 }}
+                className={`w-full text-left p-3 rounded border 
+                  ${
+                    selectedIndex === index
+                      ? "bg-blue-100 border-blue-700"
+                      : "hover:bg-gray-100"
+                  }`}
               >
-                Result
+                {answer.option}
               </button>
-            </Link>
-          ) : (
+            ))}
+          </div>
+
+          {/* Actions */}
+          <div className="flex justify-between mt-6">
             <button
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded mr-1"
+              className="px-4 py-2 border rounded"
               onClick={() => {
                 setNum(num + 1);
-                setDisable(null);
-                if (questionArr.length - 2 == num) {
-                  setBtnshow(true);
-                }
+                setSelectedIndex(null);
               }}
             >
-              Submit
+              Skip
             </button>
-          )}
+
+            {btnshow || num === questionArr.length - 1 ? (
+              <Link to="/result">
+                <button
+                  className="bg-blue-800 text-white px-6 py-2 rounded"
+                  onClick={() => {
+                    dispatch(postUserResult(ans));
+                    dispatch(
+                      postQuizResult({
+                        quizId: quizID,
+                        userId: userID,
+                        quizResult: ans,
+                      })
+                    );
+                  }}
+                >
+                  Submit
+                </button>
+              </Link>
+            ) : (
+              <button
+                disabled={selectedIndex === null}
+                className="bg-blue-800 text-white px-6 py-2 rounded disabled:opacity-50"
+                onClick={() => {
+                  setNum(num + 1);
+                  setSelectedIndex(null);
+                  if (questionArr.length - 2 === num) {
+                    setBtnshow(true);
+                  }
+                }}
+              >
+                Next
+              </button>
+            )}
+          </div>
+
         </div>
-      </div>
+      )}
     </div>
   );
 };

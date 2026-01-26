@@ -3,70 +3,84 @@ import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
 export const Resultshow = () => {
-  let [count, setCount] = useState(0);
-  let [feedback, setFeedback] = useState("");
+  const [count, setCount] = useState(0);
+  const [feedback, setFeedback] = useState("");
+
   const UserName = useSelector((state) => state.mernQuize.userName);
   const resultUser = useSelector((state) => state.mernQuize.result);
-
-  let originalResult = [];
   const singleQuiz = useSelector((state) => state?.mernQuize.QuizData);
-  const questionArr = singleQuiz[0]?.questionArray;
+  const questionArr = singleQuiz[0]?.questionArray || [];
 
-  const filterAtualAnswer = (el) => {
-    el.map((e) => {
-      originalResult.push(e.correctAnswer);
-    });
-  };
-  filterAtualAnswer(questionArr);
-
-  for (let i = 0; i < originalResult.length; i++) {
-    for (let j = 0; j < resultUser.length; j++) {
-      if (resultUser[j] == originalResult[i]) {
-        count++;
-      }
-    }
-  }
-
-  const calcPercent = () => {
-    const percentage = Math.round((count / resultUser.length) * 100);
-    if (percentage > 90) {
-      setFeedback(`Congratulations! You cleared the Test! ${UserName}`);
-    } else if (percentage > 50 && percentage < 90) {
-      setFeedback(
-        `Congratulations! You cleared the Test! and Keep Practicing ${UserName}`
-      );
-    } else {
-      setFeedback(
-        `Sorry!, You are failed to complete the Test! You need to Work Hard! and Keep Practicing  ${UserName}`
-      );
-    }
-
-  };
   useEffect(() => {
-    calcPercent();
-  });
-  return (
-    <div className=" w-11/12 shadow-2xl ml-16  mt-24">
-      <h1 className="ml-72 pl-64 mt-8 text-3xl text-sky-700">
-        Result Analysis
-      </h1>
-      <div className="flex -mt-24">
-        <div className="w-2/5 ml-4">
-          <img src="./resultAnalysis.gif" alt="resultAnalysis" />
-        </div>
-        <div className="w-2/5  mt-24 p-8">
-          <h1 className="text-2xl text-red-600">{feedback}</h1>
-          <strong className="text-xl italic text-teal-600">
-            Total Marks : {count}/{questionArr.length}
-          </strong>
-        </div>
-      </div>
+    let correct = 0;
 
-      <div className=" absolute  bg-blue-300 rounded-2xl right-24 top-28 border-2 mb-8 p-2 pl-4  pr-4 ">
-        <Link to="/">
-          <button className="text-xl font-bold ">Attempt More Quiz</button>
-        </Link>
+    questionArr.forEach((q, index) => {
+      if (q.correctAnswer === resultUser[index]) {
+        correct++;
+      }
+    });
+
+    setCount(correct);
+
+    const percentage = Math.round((correct / questionArr.length) * 100);
+
+    if (percentage >= 90) {
+      setFeedback(`🎉 Excellent! You cleared the test, ${UserName}`);
+    } else if (percentage >= 50) {
+      setFeedback(`👍 Good job! Keep practicing, ${UserName}`);
+    } else {
+      setFeedback(`❌ Don't worry ${UserName}, practice more and retry`);
+    }
+  }, [questionArr, resultUser, UserName]);
+
+  return (
+    <div className="min-h-screen bg-gray-100 flex justify-center items-center p-4">
+      <div className="bg-white w-full max-w-3xl rounded-xl shadow p-6">
+
+        <h1 className="text-2xl font-bold text-blue-900 mb-6">
+          Result Analysis
+        </h1>
+
+        {/* Stats */}
+        <div className="grid grid-cols-3 gap-4 text-center mb-6">
+          <Stat title="Score" value={`${count}/${questionArr.length}`} />
+          <Stat
+            title="Accuracy"
+            value={`${Math.round((count / questionArr.length) * 100)}%`}
+          />
+          <Stat title="Status" value={count >= questionArr.length / 2 ? "Pass" : "Fail"} />
+        </div>
+
+        {/* Feedback */}
+        <div className="bg-blue-50 p-4 rounded mb-6">
+          <p className="font-semibold text-blue-900">{feedback}</p>
+        </div>
+
+        {/* Actions */}
+        <div className="flex justify-between">
+          <Link to="/">
+            <button className="border px-4 py-2 rounded">
+              Attempt More Quiz
+            </button>
+          </Link>
+
+          <Link to="/showallanswer">
+            <button className="bg-blue-900 text-white px-4 py-2 rounded">
+              View Answers
+            </button>
+          </Link>
+        </div>
+
       </div>
     </div>
   );
 };
+
+function Stat({ title, value }) {
+  return (
+    <div className="bg-gray-50 p-4 rounded">
+      <p className="text-sm text-gray-500">{title}</p>
+      <p className="text-xl font-bold">{value}</p>
+    </div>
+  );
+}

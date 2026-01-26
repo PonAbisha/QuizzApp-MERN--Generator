@@ -1,226 +1,180 @@
-import * as types from "./actiontype.js";
+// src/Redux/action.js
+// Central minimal action creators used by the app.
+// These are lightweight thunks / action objects to satisfy imports.
+// Update endpoints to match your backend routes.
+
 import axios from "axios";
 
-// Create quiz in redux store
-export const quizRequest = () => {
-  return {
-    type: types.CREATE_QUIZ_REQUEST,
-  };
-};
+/* Action type constants */
+export const FETCH_QUIZ_REQUEST = "FETCH_QUIZ_REQUEST";
+export const FETCH_QUIZ_SUCCESS = "FETCH_QUIZ_SUCCESS";
+export const FETCH_QUIZ_FAILURE = "FETCH_QUIZ_FAILURE";
 
-export const quizSuccess = (quiz) => {
-  return {
-    type: types.CREATE_QUIZ_SUCCESS,
-    payload: quiz,
-  };
-};
+export const GET_CURRENT_QUIZ_REQUEST = "GET_CURRENT_QUIZ_REQUEST";
+export const GET_CURRENT_QUIZ_SUCCESS = "GET_CURRENT_QUIZ_SUCCESS";
+export const GET_CURRENT_QUIZ_FAILURE = "GET_CURRENT_QUIZ_FAILURE";
 
-export const quizFailure = (error) => {
-  return {
-    type: types.CREATE_QUIZ_FAILURE,
-    payload: error,
-  };
-};
+export const GET_COUNT_SUCCESS = "GET_COUNT_SUCCESS";
 
-const getCurrentQuizRequest = (payload) => {
-  return {
-    type: types.GET_CURRENT_QUIZ_REQUEST,
-    payload,
-  };
-};
-const getCurrentQuizSuccess = (payload) => {
-  return {
-    type: types.GET_CURRENT_QUIZ_SUCCESS,
-    payload,
-  };
-};
-const getCurrentQuizFailure = (payload) => {
-  return {
-    type: types.GET_CURRENT_QUIZ_FAILURE,
-    payload,
-  };
-};
-const getCountSuccess = (payload) => {
-  return {
-    type: types.GETCOUNTDATA,
-    payload,
-  };
-};
+/* API base */
+const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000";
 
-//---------- login user ----------
+/* Basic action creators */
+export const fetchQuizRequest = () => ({ type: FETCH_QUIZ_REQUEST });
+export const fetchQuizSuccess = (payload) => ({ type: FETCH_QUIZ_SUCCESS, payload });
+export const fetchQuizFailure = (err) => ({ type: FETCH_QUIZ_FAILURE, payload: err });
 
-export const loginUserName = (payload) => {
-  return {
-    type: types.GETUSERNAME,
-    payload,
-  };
-};
-export const loginUser = (payload) => {
-  return {
-    type: types.GETUSERID,
-    payload,
-  };
-};
+export const getCurrentQuizRequest = (quizId) => ({ type: GET_CURRENT_QUIZ_REQUEST, payload: quizId });
+export const getCurrentQuizSuccess = (quiz) => ({ type: GET_CURRENT_QUIZ_SUCCESS, payload: quiz });
+export const getCurrentQuizFailure = (err) => ({ type: GET_CURRENT_QUIZ_FAILURE, payload: err });
 
-export const Logouthandleraction = (payload) => {
-  return {
-    type: types.LOGOUTUSER,
-    payload,
-  };
-};
+export const getCountSuccess = (count) => ({ type: GET_COUNT_SUCCESS, payload: count });
 
-export const loginAdminId = (payload) => {
-  return {
-    type: types.GETADMINID,
-    payload,
-  };
-};
-export const loginAdminName = (payload) => {
-  return {
-    type: types.GETADMINNAME,
-    payload,
-  };
-};
+/* Thunks / exported functions referenced across the app */
 
-// ----------------------- action creator function for  details of user  for admin page ---------------
-
-const getAllUserDataRequest = (payload) => {
-  return {
-    type: types.GET_ALL_USER_DATA_REQUEST,
-    payload,
-  };
-};
-
-const getAllUserDataSuccess = (payload) => {
-  return {
-    type: types.GET_ALL_USER_DATA_SUCCESS,
-    payload,
-  };
-};
-
-const getAllUserDataFailure = (payload) => {
-  return {
-    type: types.GET_ALL_USER_DATA_FAILURE,
-    payload,
-  };
-};
-
-// ----------------------- details of user  for admin page  and delete user by admin ---------------
-
-export const getAllUserDataFromBackend = (payload) => (dispatch) => {
-  dispatch(getAllUserDataRequest());
-  axios
-    .get("https://mern-quiz-server-sudhir.onrender.com/getuser")
-    .then((res) => {
-      dispatch(getAllUserDataSuccess(res.data));
-    })
-    .catch((err) => {
-      dispatch(getAllUserDataFailure());
-    });
-};
-
-export const deleteUserByAdmin = (payload) => (dispatch) => {
-  axios
-    .delete(`https://mern-quiz-server-sudhir.onrender.com/${payload}`)
-    .then((response) => {
-      dispatch(getAllUserDataFromBackend());
-    })
-    .catch((error) => {
-      console.log("error");
-    });
-};
-
-// ----------post quiz--------------
-
-export const postQuizObj = (obj) => (dispatch) => {
-  axios
-    .post("https://mern-quiz-server-sudhir.onrender.com/admin", obj)
-    .then((res) => {
-     
-    })
-    .catch((err) => {
-      
-    });
-};
-
-// ----------------------------- fetching quiz data subject wise -------------
-
-const fetchQuizRequest = (payload) => {
-  return {
-    type: types.FETCH_QUIZ_REQUEST,
-    payload,
-  };
-};
-const fetchQuizSuccess = (payload) => {
-  return {
-    type: types.FETCH_QUIZ_SUCCESS,
-    payload,
-  };
-};
-const fetchQuizFailure = (payload) => {
-  return {
-    type: types.FETCH_QUIZ_FAILURE,
-    payload,
-  };
-};
-export const fetchQuizDataFrombackend = () => (dispatch) => {
-  axios
-    .get("https://mern-quiz-server-sudhir.onrender.com/api/quiz")
-    .then((res) => dispatch(fetchQuizSuccess(res.data)))
-    .catch((err) => console.log(err));
-};
-
-export const getQuiz = (params) => (dispatch) => {
-  axios
-    .get(`https://mern-quiz-server-sudhir.onrender.com/quiz/${params.id}`)
-    .then((res) => {
-    
+// fetchQuizDataFrombackend (NewQuizPage)
+export const fetchQuizDataFrombackend = (params = {}) => {
+  return async (dispatch) => {
+    dispatch(fetchQuizRequest());
+    try {
+      const res = await axios.get(`${API_BASE}/quizzes`, { params });
       dispatch(fetchQuizSuccess(res.data));
-    })
-    .catch((err) => {
-    });
-};
-
-//------------posting the user quiz result ------------
-
-//  -----------posting user result ------------
-
-export const postUserResult = (ans) => {
-  return {
-    type: types.SET_USER_RESULT_SUCCESS,
-    payload: ans,
+      return res.data;
+    } catch (err) {
+      dispatch(fetchQuizFailure(err.message || err));
+      throw err;
+    }
   };
 };
 
-// ------action creator function and axios function =-------
+// getAllUserDataFromBackend (Admin.jsx)
+export const getAllUserDataFromBackend = () => {
+  return async (dispatch) => {
+    try {
+      const res = await axios.get(`${API_BASE}/admin/users`);
+      return res.data;
+    } catch (err) {
+      console.error("getAllUserDataFromBackend error:", err);
+      throw err;
+    }
+  };
+};
 
-const postUserResultRequest = (ans) => {
-  return {
-    type: types.POST_USER_RESULT_SUCCESS,
-    payload: ans,
+// quizSuccess (QuizForm.jsx) - simple wrapper
+export const quizSuccess = (quizObj) => {
+  return (dispatch) => {
+    dispatch(fetchQuizSuccess(quizObj));
   };
 };
-const postUserResultSuccess = (ans) => {
-  return {
-    type: types.POST_USER_RESULT_SUCCESS,
-    payload: ans,
+
+// postQuizObj (QuizForm.jsx) - create quiz
+export const postQuizObj = (quizObj) => {
+  return async (dispatch) => {
+    try {
+      const res = await axios.post(`${API_BASE}/admin/quiz`, quizObj);
+      dispatch(fetchQuizSuccess(res.data));
+      return res.data;
+    } catch (err) {
+      dispatch(fetchQuizFailure(err.message || err));
+      throw err;
+    }
   };
 };
-const postUserResultFailure = (ans) => {
-  return {
-    type: types.POST_USER_RESULT_SUCCESS,
-    payload: ans,
+
+// deleteUserByAdmin (UserdetailForAdmin.jsx)
+export const deleteUserByAdmin = (userId) => {
+  return async (dispatch) => {
+    try {
+      const res = await axios.delete(`${API_BASE}/admin/user/${userId}`);
+      return res.data;
+    } catch (err) {
+      console.error("deleteUserByAdmin error:", err);
+      throw err;
+    }
   };
 };
-export const postQuizResult = (obj) => (dispatch) => {
-  const { quizId, userId, quizResult } = obj;
-  dispatch(postUserResultRequest());
-  axios
-    .post(`https://mern-quiz-server-sudhir.onrender.com/userResult/${userId}`, obj)
-    .then((res) => {
-      dispatch(postUserResultSuccess(res.data));
-    })
-    .catch((err) => {
-      dispatch(postUserResultFailure(err));
-    });
+
+// Logouthandleraction (Navbar)
+export const Logouthandleraction = () => {
+  return (dispatch) => {
+    try {
+      localStorage.removeItem("token");
+      dispatch(fetchQuizFailure(null));
+      return true;
+    } catch (err) {
+      console.error("Logout error:", err);
+      return false;
+    }
+  };
+};
+
+// postUserResult (Quiz.jsx)
+export const postUserResult = (resultObj) => {
+  return async (dispatch) => {
+    try {
+      const res = await axios.post(`${API_BASE}/userResult`, resultObj);
+      return res.data;
+    } catch (err) {
+      console.error("postUserResult error:", err);
+      throw err;
+    }
+  };
+};
+
+// postQuizResult (Quiz.jsx)
+export const postQuizResult = (quizResult) => {
+  return async (dispatch) => {
+    try {
+      const res = await axios.post(`${API_BASE}/quiz/result`, quizResult);
+      return res.data;
+    } catch (err) {
+      console.error("postQuizResult error:", err);
+      throw err;
+    }
+  };
+};
+
+// getQuiz (Quizes.jsx)
+export const getQuiz = (params = {}) => {
+  return async (dispatch) => {
+    try {
+      const res = await axios.get(`${API_BASE}/quizzes`, { params });
+      dispatch(fetchQuizSuccess(res.data));
+      return res.data;
+    } catch (err) {
+      dispatch(fetchQuizFailure(err.message || err));
+      throw err;
+    }
+  };
+};
+
+// login-related actions (Login.jsx)
+export const loginUser = (creds) => {
+  return async (dispatch) => {
+    try {
+      const res = await axios.post(`${API_BASE}/auth/login`, creds);
+      if (res.data?.token) localStorage.setItem("token", res.data.token);
+      return res.data;
+    } catch (err) {
+      throw err;
+    }
+  };
+};
+
+export const loginUserName = (name) => {
+  return (dispatch) => {
+    dispatch(fetchQuizSuccess({ name }));
+  };
+};
+
+export const loginAdminId = (id) => {
+  return (dispatch) => {
+    dispatch(fetchQuizSuccess({ adminId: id }));
+  };
+};
+
+export const loginAdminName = (name) => {
+  return (dispatch) => {
+    dispatch(fetchQuizSuccess({ adminName: name }));
+  };
 };
