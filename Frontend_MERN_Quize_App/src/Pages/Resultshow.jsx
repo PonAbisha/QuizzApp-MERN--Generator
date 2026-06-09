@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import "react-toastify/dist/ReactToastify.css";
+
 
 export const Resultshow = () => {
   const [count, setCount] = useState(0);
