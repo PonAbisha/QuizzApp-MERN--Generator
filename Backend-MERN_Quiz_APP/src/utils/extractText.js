@@ -2,7 +2,7 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 const rawPdf = require("pdf-parse");
-const pdf = require("pdf-poppler");
+//const pdf = require("pdf-poppler");
 const { createWorker } = require("tesseract.js");
 
 function getEnglishLangPath() {
@@ -20,7 +20,7 @@ function sortImagePages(files) {
   });
 }
 
-async function extractTextWithOcr(filePath) {
+/*async function extractTextWithOcr(filePath) {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "quiz-ocr-"));
 
   try {
@@ -77,7 +77,7 @@ async function extractTextWithOcr(filePath) {
     });
   }
 }
-
+*/
 async function extractText(filePath) {
   const buffer = fs.readFileSync(filePath);
 
