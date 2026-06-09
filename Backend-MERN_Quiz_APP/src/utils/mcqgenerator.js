@@ -24,8 +24,32 @@ function pickKeyword(words) {
   return best || null;
 }
 
-function generateMcqsFromText(text, maxCount = 20) {
+function getDifficultyScore(sentence, words) {
+  const uniqueWords = new Set(words.map((word) => word.toLowerCase()));
+  return words.length + uniqueWords.size + Math.round(sentence.length / 20);
+}
+
+function filterByDifficulty(items, difficulty) {
+  const sorted = [...items].sort(
+    (a, b) => a.difficultyScore - b.difficultyScore
+  );
+
+  if (difficulty === "easy") {
+    return sorted.slice(0, Math.max(1, Math.ceil(sorted.length * 0.45)));
+  }
+
+  if (difficulty === "hard") {
+    return sorted.slice(Math.floor(sorted.length * 0.45));
+  }
+
+  return sorted;
+}
+
+function generateMcqsFromText(text, maxCount = 20, difficulty = "medium") {
   const sentences = splitIntoSentences(text);
+  const normalizedDifficulty = ["easy", "medium", "hard"].includes(difficulty)
+    ? difficulty
+    : "medium";
 
   const base = [];
   const allKeywords = [];
@@ -46,15 +70,22 @@ function generateMcqsFromText(text, maxCount = 20) {
       sentence,
       keyword,
       questionText,
+      difficulty: normalizedDifficulty,
+      difficultyScore: getDifficultyScore(sentence, words),
     });
   }
 
   // Use unique keywords as pool for wrong options
   const uniqueKeywords = [...new Set(allKeywords)];
 
+  // Shuffle the base candidates so questions are distributed across the entire book
+  const filteredBase = filterByDifficulty(base, normalizedDifficulty);
+
+  const shuffledBase = filteredBase.sort(() => 0.5 - Math.random());
+
   const questions = [];
 
-  for (const item of base) {
+  for (const item of shuffledBase) {
     const correct = item.keyword;
 
     // Pick 3 wrong options from other keywords
@@ -75,6 +106,8 @@ function generateMcqsFromText(text, maxCount = 20) {
       questionText: item.questionText,
       options,
       correctIndex,
+      difficulty: item.difficulty,
+      sentence: item.sentence, // Pass original sentence so we can map it back to the physical page
     });
 
     if (questions.length >= maxCount) break;

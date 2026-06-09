@@ -26,3 +26,16 @@ Thumbs.db
 
 # ===== Coverage =====
 coverage/
+
+
+# Quiz app uploads
+Backend-MERN_Quiz_APP/uploads/
+
+# Backend env
+Backend-MERN_Quiz_APP/.env
+
+# Backend node_modules
+Backend-MERN_Quiz_APP/node_modules/
+
+# Zip files
+*.zip

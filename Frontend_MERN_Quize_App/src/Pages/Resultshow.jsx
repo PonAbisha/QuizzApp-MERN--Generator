@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export const Resultshow = () => {
   const [count, setCount] = useState(0);
@@ -9,7 +11,9 @@ export const Resultshow = () => {
   const UserName = useSelector((state) => state.mernQuize.userName);
   const resultUser = useSelector((state) => state.mernQuize.result);
   const singleQuiz = useSelector((state) => state?.mernQuize.QuizData);
-  const questionArr = singleQuiz[0]?.questionArray || [];
+  
+  // Memoize questionArr to prevent unnecessary useEffect triggers due to new array instances
+  const questionArr = useMemo(() => singleQuiz[0]?.questionArray || [], [singleQuiz]);
 
   useEffect(() => {
     let correct = 0;
@@ -72,6 +76,7 @@ export const Resultshow = () => {
         </div>
 
       </div>
+      <ToastContainer theme="light" position="bottom-right" />
     </div>
   );
 };

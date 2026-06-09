@@ -27,134 +27,134 @@ export const Quiz = ({ questionArr }) => {
   const currentQuestion = questionArr[num];
 
   /* ================= TIMER ================= */
+  // Effect 1: Handles the countdown interval
   useEffect(() => {
-    if (!started) return;
-    if (timeLeft <= 0) {
-      if (!autoSubmitted.current) {
-        autoSubmitted.current = true;
-
-        dispatch(postUserResult(ans));
-        dispatch(
-          postQuizResult({
-            quizId: quizID,
-            userId: userID,
-            quizResult: ans,
-          })
-        );
-
-        navigate("/result");
-      }
-      return;
-    }
+    if (!started || timeLeft <= 0) return;
 
     const timer = setInterval(() => {
       setTimeLeft((prev) => prev - 1);
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [timeLeft, started]);
+  }, [started, timeLeft]);
+
+  // Effect 2: Handles auto-submission when time runs out
+  useEffect(() => {
+    if (started && timeLeft <= 0 && !autoSubmitted.current) {
+      autoSubmitted.current = true;
+
+      dispatch(postUserResult(ans));
+      dispatch(
+        postQuizResult({
+          quizId: quizID,
+          userId: userID,
+          quizResult: ans,
+        })
+      );
+
+      navigate("/result");
+    }
+  }, [started, timeLeft, ans, dispatch, navigate, quizID, userID]);
 
   /* ================ UI ================= */
 
   return (
-    <div className="min-h-screen bg-gray-100 flex justify-center items-center p-4">
+    <div className="min-h-screen bg-[#f6f7fb] px-4 py-8 text-slate-900 sm:px-6">
+      <div className="mx-auto w-full max-w-3xl">
 
-      {/* Exam Rules Modal */}
-      {!started && (
-        <ExamRulesModal onStart={() => setStarted(true)} />
-      )}
+        {/* Exam Rules Modal */}
+        {!started && <ExamRulesModal onStart={() => setStarted(true)} />}
 
-      {started && (
-        <div className="bg-white w-full max-w-3xl rounded-xl shadow p-6">
+        {started && (
+          <div className="rounded-3xl bg-white p-6 shadow-sm shadow-slate-200">
 
-          {/* Progress + Timer */}
-          <div className="flex justify-between text-sm text-gray-600 mb-4">
-            <span>
-              Question {num + 1} / {questionArr.length}
-            </span>
-            <span className="font-semibold text-red-600">
-              ⏱️ {Math.floor(timeLeft / 60)}:
-              {String(timeLeft % 60).padStart(2, "0")}
-            </span>
-          </div>
+            {/* Progress + Timer */}
+            <div className="mb-4 flex flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-slate-700 sm:flex-row sm:items-center sm:justify-between">
+              <span className="text-sm font-semibold text-slate-700">
+                Question {num + 1} / {questionArr.length}
+              </span>
+              <span className="rounded-full bg-blue-50 px-3 py-1 text-sm font-semibold text-blue-700">
+                ⏱️ {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, "0")}
+              </span>
+            </div>
 
-          {/* Question */}
-          <h2 className="text-xl font-tamil mb-6">
-            {currentQuestion?.questions}
-          </h2>
+            {/* Question */}
+            <h2 className="text-2xl font-semibold leading-tight text-slate-950 mb-6">
+              {currentQuestion?.questionText || currentQuestion?.questions}
+            </h2>
 
-          {/* Options */}
-          <div className="space-y-3">
-            {currentQuestion?.options?.map((answer, index) => (
-              <button
-                key={index}
-                onClick={() => {
-                  const updated = [...ans];
-                  updated[num] = answer.option;
-                  setAns(updated);
-                  setSelectedIndex(index);
-                }}
-                className={`w-full text-left p-3 rounded border 
-                  ${
-                    selectedIndex === index
-                      ? "bg-blue-100 border-blue-700"
-                      : "hover:bg-gray-100"
-                  }`}
-              >
-                {answer.option}
-              </button>
-            ))}
-          </div>
-
-          {/* Actions */}
-          <div className="flex justify-between mt-6">
-            <button
-              className="px-4 py-2 border rounded"
-              onClick={() => {
-                setNum(num + 1);
-                setSelectedIndex(null);
-              }}
-            >
-              Skip
-            </button>
-
-            {btnshow || num === questionArr.length - 1 ? (
-              <Link to="/result">
+            {/* Options */}
+            <div className="space-y-3">
+              {currentQuestion?.options?.map((answer, index) => (
                 <button
-                  className="bg-blue-800 text-white px-6 py-2 rounded"
+                  key={index}
                   onClick={() => {
-                    dispatch(postUserResult(ans));
-                    dispatch(
-                      postQuizResult({
-                        quizId: quizID,
-                        userId: userID,
-                        quizResult: ans,
-                      })
-                    );
+                    const updated = [...ans];
+                    updated[num] = typeof answer === 'object' ? answer.option : answer;
+                    setAns(updated);
+                    setSelectedIndex(index);
                   }}
+                  className={`w-full rounded-2xl border px-4 py-3 text-left transition ${
+                    selectedIndex === index
+                      ? "bg-blue-50 border-blue-300 text-slate-900"
+                      : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                  }`}
                 >
-                  Submit
+                  {typeof answer === 'object' ? answer.option : answer}
                 </button>
-              </Link>
-            ) : (
+              ))}
+            </div>
+
+            {/* Actions */}
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <button
-                disabled={selectedIndex === null}
-                className="bg-blue-800 text-white px-6 py-2 rounded disabled:opacity-50"
+                className="w-full rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 sm:w-auto"
                 onClick={() => {
                   setNum(num + 1);
                   setSelectedIndex(null);
-                  if (questionArr.length - 2 === num) {
-                    setBtnshow(true);
-                  }
                 }}
               >
-                Next
+                Skip
               </button>
-            )}
-          </div>
 
-        </div>
-      )}
+              {btnshow || num === questionArr.length - 1 ? (
+                <Link to="/result" className="w-full sm:w-auto">
+                  <button
+                    className="w-full rounded-2xl bg-blue-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-800 sm:w-auto"
+                    onClick={() => {
+                      dispatch(postUserResult(ans));
+                      dispatch(
+                        postQuizResult({
+                          quizId: quizID,
+                          userId: userID,
+                          quizResult: ans,
+                        })
+                      );
+                    }}
+                  >
+                    Submit
+                  </button>
+                </Link>
+              ) : (
+                <button
+                  disabled={selectedIndex === null}
+                  className="w-full rounded-2xl bg-blue-700 px-5 py-3 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-50 hover:bg-blue-800 sm:w-auto"
+                  onClick={() => {
+                    setNum(num + 1);
+                    setSelectedIndex(null);
+                    if (questionArr.length - 2 === num) {
+                      setBtnshow(true);
+                    }
+                  }}
+                >
+                  Next
+                </button>
+              )}
+            </div>
+
+          </div>
+        )}
+      </div>
     </div>
   );
 };

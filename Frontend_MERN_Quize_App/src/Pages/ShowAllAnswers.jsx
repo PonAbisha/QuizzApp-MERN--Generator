@@ -21,7 +21,7 @@ export const ShowAllAnswers = () => {
             return (
               <div className="h-16 mt-4 border-2 pl-4 ">
                 <p>
-                  {index + 1}) {e.questions}
+                  {index + 1}) {e.questionText || e.questions}
                 </p>
               </div>
             );
