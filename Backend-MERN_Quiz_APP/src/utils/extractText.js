@@ -148,14 +148,9 @@ async function extractText(filePath) {
     };
   }
 
-  console.log("No readable text layer found. Running OCR fallback...");
-
-  const ocrPages = await extractTextWithOcr(filePath);
-  const ocrText = ocrPages.map((page) => page.text).join("\n");
-
   return {
-    fullText: ocrText || data.text || "",
-    pagesList: ocrPages.length ? ocrPages : extractedPages,
+  fullText: data.text || "",
+  pagesList: extractedPages,
   };
 }
 
