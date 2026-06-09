@@ -22,7 +22,7 @@ export const Quizes = () => {
   }, []);
   return isLoading ? (
     <div>
-      <iframe
+      <iframe title="quiz-preview"
         className="w-4/5 h-96 ml-40"
         src="https://embed.lottiefiles.com/animation/9844"
       ></iframe>
