@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 const QuizHome = () => {
   const [books, setBooks] = useState([]);
   const [error, setError] = useState("");
-  const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000";
+  const API_BASE = process.env.REACT_APP_API_BASE || "https://quizzapp-backend-abisha.onrender.com";
 
   useEffect(() => {
     const fetchBooks = async () => {

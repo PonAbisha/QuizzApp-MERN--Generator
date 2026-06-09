@@ -16,7 +16,7 @@ export default function BookList() {
   const [error, setError] = useState("");
 
   const navigate = useNavigate();
-  const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000";
+  const API_BASE = process.env.REACT_APP_API_BASE || "https://quizzapp-backend-abisha.onrender.com";
 
   useEffect(() => {
     loadBooks();

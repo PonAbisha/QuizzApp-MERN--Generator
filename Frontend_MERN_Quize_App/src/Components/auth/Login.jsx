@@ -14,7 +14,7 @@ import "react-toastify/dist/ReactToastify.css";
 export const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000";
+  const API_BASE = process.env.REACT_APP_API_BASE || "https://quizzapp-backend-abisha.onrender.com";
 
   const [user, setUser] = useState({
     email: "",

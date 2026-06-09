@@ -8,7 +8,7 @@ import QuizPlayer from "../Components/QuizPlayer";
 export default function Questions() {
   const { bookId } = useParams();
   const navigate = useNavigate();
-  const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000";
+  const API_BASE = process.env.REACT_APP_API_BASE || "https://quizzapp-backend-abisha.onrender.com";
 
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(false);

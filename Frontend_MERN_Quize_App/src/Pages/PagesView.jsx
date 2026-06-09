@@ -7,7 +7,7 @@ export default function PagesView() {
   const { bookId } = useParams();
   const [pages, setPages] = useState([]);
   const [loading, setLoading] = useState(false);
-  const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000";
+  const API_BASE = process.env.REACT_APP_API_BASE || "https://quizzapp-backend-abisha.onrender.com";
   const navigate = useNavigate();
 
   useEffect(() => {
