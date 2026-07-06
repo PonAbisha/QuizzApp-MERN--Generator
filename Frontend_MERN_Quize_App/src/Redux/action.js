@@ -148,33 +148,11 @@ export const getQuiz = (params = {}) => {
   };
 };
 
-// login-related actions (Login.jsx)
-export const loginUser = (creds) => {
-  return async (dispatch) => {
-    try {
-      const res = await axios.post(`${API_BASE}/auth/login`, creds);
-      if (res.data?.token) localStorage.setItem("token", res.data.token);
-      return res.data;
-    } catch (err) {
-      throw err;
-    }
-  };
-};
-
-export const loginUserName = (name) => {
-  return (dispatch) => {
-    dispatch(fetchQuizSuccess({ name }));
-  };
-};
-
-export const loginAdminId = (id) => {
-  return (dispatch) => {
-    dispatch(fetchQuizSuccess({ adminId: id }));
-  };
-};
-
-export const loginAdminName = (name) => {
-  return (dispatch) => {
-    dispatch(fetchQuizSuccess({ adminName: name }));
-  };
-};
+// NOTE: login itself is handled directly in Login.jsx via axios.post(`${API_BASE}/login`, ...),
+// which then dispatches GETUSERID/GETUSERNAME or GETADMINID/GETADMINNAME (see Redux/actiontype.js
+// and Redux/reducer.js) with the correct `loggedUser.id` field from the backend response.
+// The previous loginUser/loginUserName/loginAdminId/loginAdminName helpers here were removed:
+// - loginUser posted to a nonexistent `/auth/login` route (the real route is `/login`) and
+//   was never actually wired to Login.jsx's dispatch calls correctly.
+// - loginUserName/loginAdminId/loginAdminName all dispatched fetchQuizSuccess(), which only
+//   ever wrote to state.QuizData instead of state.userId/userName/adminId/adminName.

@@ -3,11 +3,11 @@ import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import {
-  loginAdminId,
-  loginAdminName,
-  loginUser,
-  loginUserName,
-} from "../../Redux/action";
+  GETUSERID,
+  GETUSERNAME,
+  GETADMINID,
+  GETADMINNAME,
+} from "../../Redux/actiontype";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -41,12 +41,12 @@ export const Login = () => {
       localStorage.setItem("token", token);
 
       if (loggedUser.email === "sudhirchavhan100@gmail.com") {
-        dispatch(loginAdminId(loggedUser._id));
-        dispatch(loginAdminName(loggedUser.name));
+        dispatch({ type: GETADMINID, payload: loggedUser.id });
+        dispatch({ type: GETADMINNAME, payload: loggedUser.name });
         toast.success(`Welcome Admin ${loggedUser.name}`);
       } else {
-        dispatch(loginUser(loggedUser._id));
-        dispatch(loginUserName(loggedUser.name));
+        dispatch({ type: GETUSERID, payload: loggedUser.id });
+        dispatch({ type: GETUSERNAME, payload: loggedUser.name });
         toast.success("Login successful! Welcome back.");
       }
 
