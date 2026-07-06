@@ -618,7 +618,7 @@ app.use("/user", userResult);
 
 // ================= START SERVER =================
 
-app.listen(PORT, async () => {
+const startServer = async () => {
 
   try {
 
@@ -628,9 +628,13 @@ app.listen(PORT, async () => {
       "Connected to Database"
     );
 
-    console.log(
-      `Server running at http://localhost:${PORT}`
-    );
+    app.listen(PORT, () => {
+
+      console.log(
+        `Server running at http://localhost:${PORT}`
+      );
+
+    });
 
   } catch (err) {
 
@@ -639,6 +643,10 @@ app.listen(PORT, async () => {
       err
     );
 
+    process.exit(1);
+
   }
 
-});
+};
+
+startServer();
